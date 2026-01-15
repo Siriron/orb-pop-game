@@ -80,6 +80,7 @@ body, html { overflow:hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     <p>Connect your wallet to record your scores on Arc Testnet. You can play without connecting.</p>
     <button id="connectBtn">Connect Wallet</button>
     <button id="leaderboardBtn">View Leaderboard</button>
+    <button id="playWithoutWalletBtn" style="background: rgba(127, 90, 240, 0.2); border: 2px solid #7f5af0;">Play Without Wallet</button>
   </div>
 </div>
 
@@ -126,7 +127,7 @@ const orbColors = [
     {color:'#00f0ff', type:'rare'},
     {color:'#ff6fff', type:'epic'}
 ];
-const orbCount = 8;
+const orbCount = 12;
 let orbs = [];
 let pops = 0;
 let recentPops = [];
@@ -188,23 +189,57 @@ class Orb {
     
     ctx.save();
     
-    // Draw trail
+    // Draw glow effect
+    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 1.5);
+    gradient.addColorStop(0, this.color + '40');
+    gradient.addColorStop(0.5, this.color + '20');
+    gradient.addColorStop(1, 'transparent');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(this.x - this.radius * 1.5, this.y - this.radius * 1.5, this.radius * 3, this.radius * 3);
+    
+    // Draw trail with enhanced glow
     for(let i = 0; i < this.trail.length; i++) {
       const t = this.trail[i];
+      const trailAlpha = 0.4 * (1 - i / this.trail.length);
+      const trailRadius = this.radius * 0.7 * (1 - i / this.trail.length);
+      
       ctx.beginPath();
       ctx.fillStyle = this.color;
-      ctx.globalAlpha = 0.3 * (1 - i / this.trail.length);
-      ctx.arc(t.x, t.y, this.radius * 0.6 * (1 - i / this.trail.length), 0, 2 * Math.PI);
+      ctx.globalAlpha = trailAlpha;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 15;
+      ctx.arc(t.x, t.y, trailRadius, 0, 2 * Math.PI);
       ctx.fill();
     }
     
-    // Draw main orb
+    // Draw main orb with enhanced effects
     ctx.globalAlpha = 1;
-    ctx.beginPath();
-    ctx.fillStyle = this.color;
     ctx.shadowColor = this.color;
-    ctx.shadowBlur = 20;
+    ctx.shadowBlur = 30;
+    
+    // Inner glow
+    const innerGradient = ctx.createRadialGradient(
+      this.x - this.radius * 0.3, 
+      this.y - this.radius * 0.3, 
+      0, 
+      this.x, 
+      this.y, 
+      this.radius
+    );
+    innerGradient.addColorStop(0, '#ffffff');
+    innerGradient.addColorStop(0.3, this.color);
+    innerGradient.addColorStop(1, this.color + 'cc');
+    
+    ctx.beginPath();
+    ctx.fillStyle = innerGradient;
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Shine effect
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.fillStyle = '#ffffff';
+    ctx.arc(this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.3, 0, 2 * Math.PI);
     ctx.fill();
     
     ctx.restore();
@@ -265,13 +300,14 @@ function spawnOrbs() {
 }
 
 function spawnBg() {
-  for(let i = 0; i < 100; i++) bgParticles.push(new BgParticle());
+  for(let i = 0; i < 150; i++) bgParticles.push(new BgParticle());
 }
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   bgParticles.forEach(p => {p.move(); p.draw();});
   orbs.forEach(o => {o.move(); o.draw();});
+  updateExplosions();
   requestAnimationFrame(animate);
 }
 
@@ -313,6 +349,9 @@ canvas.addEventListener('click', e => {
         pops++;
         document.getElementById('popCounter').textContent = `Pops: ${pops}`;
         
+        // Create explosion particles
+        createExplosion(orb.x, orb.y, orb.color);
+        
         try {
           popSound.currentTime = 0;
           popSound.play().catch(() => {});
@@ -330,6 +369,56 @@ canvas.addEventListener('click', e => {
   });
 });
 
+// --- EXPLOSION PARTICLES ---
+let explosionParticles = [];
+
+class ExplosionParticle {
+  constructor(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.vx = (Math.random() - 0.5) * 8;
+    this.vy = (Math.random() - 0.5) * 8;
+    this.radius = Math.random() * 4 + 2;
+    this.color = color;
+    this.alpha = 1;
+    this.decay = Math.random() * 0.02 + 0.02;
+  }
+  
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += 0.2; // gravity
+    this.alpha -= this.decay;
+    return this.alpha > 0;
+  }
+  
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function createExplosion(x, y, color) {
+  for(let i = 0; i < 20; i++) {
+    explosionParticles.push(new ExplosionParticle(x, y, color));
+  }
+}
+
+function updateExplosions() {
+  explosionParticles = explosionParticles.filter(p => {
+    const alive = p.update();
+    if(alive) p.draw();
+    return alive;
+  });
+}
+
 // --- WALLET / WEB3 ---
 async function connectWallet() {
   if(window.ethereum) {
@@ -346,8 +435,8 @@ async function connectWallet() {
       
       // Check network
       const network = await provider.getNetwork();
-      if(network.chainId !== 1234567) { // Replace with actual Arc Testnet chain ID
-        showToast('Please switch to Arc Testnet', 'warning');
+      if(network.chainId !== 5042002) {
+        showToast('Please switch to Arc Testnet (Chain ID: 5042002)', 'warning');
       }
       
       document.getElementById('walletAddressDisplay').textContent = 
@@ -424,7 +513,7 @@ async function fetchLeaderboard() {
     if(provider && provider.provider) {
       readProvider = provider;
     } else {
-      // Fallback to public RPC (replace with actual Arc Testnet RPC)
+      // Fallback to public RPC - Arc Testnet
       readProvider = new ethers.providers.JsonRpcProvider("https://rpc.testnet.arc.network");
     }
     
@@ -489,6 +578,12 @@ async function fetchLeaderboard() {
 document.getElementById('leaderboardBtn').addEventListener('click', fetchLeaderboard);
 document.getElementById('leaderboardClose').addEventListener('click', () => {
   document.getElementById('leaderboardPanel').classList.remove('active');
+});
+
+// --- PLAY WITHOUT WALLET ---
+document.getElementById('playWithoutWalletBtn').addEventListener('click', () => {
+  document.getElementById('walletModal').style.display = 'none';
+  showToast('Playing without wallet - scores won\'t be recorded on-chain', 'info');
 });
 
 // --- RESIZE ---
