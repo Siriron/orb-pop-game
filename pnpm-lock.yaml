@@ -1,9 +1,29 @@
 lockfileVersion: '9.0'
 
+importers:
+  .:
+    specifiers:
+      ethers: ^5.7.2
+      live-server: ^1.2.2
+    dependencies:
+      ethers: 5.7.2
+      live-server: 1.2.2
+
+packages:
+  /ethers/5.7.2:
+    resolution:
+      integrity: sha512-PLACEHOLDER_FOR_INTEGRITY_HASH
+    engines:
+      node: '>=12'
+    dev: false
+
+  /live-server/1.2.2:
+    resolution:
+      integrity: sha512-PLACEHOLDER_FOR_INTEGRITY_HASH
+    engines:
+      node: '>=12'
+    dev: true
+
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
-
-importers:
-
-  .: {}
