@@ -1,30 +1,26 @@
-# Orb pop game
+# Legendary Arc Orb Pop Challenge 🎮✨
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/sirironhearts-projects/v0-orb-pop-game)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/qXwujhcajhB)
-
+*Interactive ARC Testnet orb-popping game with on-chain score recording.
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+Players can pop colorful ARK-themed orbs, connect their wallets, and **record scores on-chain** using **Arc Testnet**.  
 
-## Deployment
+This project is fully **safe, non-financial, and builder-focused**, designed to showcase real ARC ecosystem contributions.
 
-Your project is live at:
+## Features
 
-**[https://vercel.com/sirironhearts-projects/v0-orb-pop-game](https://vercel.com/sirironhearts-projects/v0-orb-pop-game)**
+- Interactive **orb-popping canvas game** with smooth animations  
+- **Wallet connect** (MetaMask) for Arc Testnet  
+- **On-chain score recording** via verified smart contract (`0x69f153233DB821382c5b7E03348304d161942539`)  
+- **Leaderboard** displaying top 10 scorers  
+- Recent pops panel + animated orbs and particle effects  
+- Toast notifications for fun feedback  
 
-## Build your app
+## Build & Update
 
-Continue building your app on:
+1. Edit project locally in your preferred IDE  
+2. Deploy changes via Vercel or your hosting platform  
 
-**[https://v0.app/chat/qXwujhcajhB](https://v0.app/chat/qXwujhcajhB)**
+## ARC Ecosystem Contribution
 
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+This app is a **creative, non-financial demonstration of building on Arc Testnet**.  
