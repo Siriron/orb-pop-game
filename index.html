@@ -6,384 +6,99 @@
 <title>Legendary Arc Orb Pop Challenge</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body, html {
-  overflow:hidden;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #0a0a2a 0%, #0d0d3a 100%);
-  color: #ffffff;
-  height: 100vh;
-}
+body, html { overflow:hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0a0a2a 0%, #0d0d3a 100%); color: #fff; height:100vh; }
 
-#gameCanvas { 
-  position:absolute; top:0; left:0; width:100%; height:100%; display:block; 
-}
+#gameCanvas { position:absolute; top:0; left:0; width:100%; height:100%; display:block; }
+#ui { position:absolute; top:20px; left:20px; z-index:100; display:flex; align-items:center; gap:30px; }
+#popCounter { font-size:32px; font-weight:bold; background: rgba(127, 90, 240, 0.15); border: 2px solid #7f5af0; padding:12px 20px; border-radius:8px; box-shadow: 0 0 20px rgba(127, 90, 240, 0.3); }
+#gameStatus { font-size:14px; color:#00f0ff; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); padding:8px 12px; border-radius:6px; }
 
-/* === TOP UI === */
-#ui {
-  position:absolute; top:20px; left:20px; z-index:100;
-  display:flex; align-items:center; gap:30px;
-}
-
-#popCounter {
-  font-size:32px; font-weight:bold;
-  background: rgba(127, 90, 240, 0.15);
-  border: 2px solid #7f5af0;
-  padding:12px 20px;
-  border-radius:8px;
-  box-shadow: 0 0 20px rgba(127, 90, 240, 0.3);
-}
-
-#gameStatus {
-  font-size:14px; color:#00f0ff;
-  background: rgba(0, 240, 255, 0.1);
-  border: 1px solid rgba(0, 240, 255, 0.3);
-  padding:8px 12px;
-  border-radius:6px;
-}
-
-/* === WALLET MODAL === */
-#walletModal {
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  background: rgba(0,0,0,0.7);
-  display:flex; align-items:center; justify-content:center;
-  z-index:1000;
-  backdrop-filter:blur(4px);
-}
-
-#walletModalContent {
-  background: linear-gradient(135deg, rgba(20, 20, 50, 0.95), rgba(30, 30, 60, 0.95));
-  border: 2px solid #7f5af0;
-  border-radius:12px;
-  padding:40px;
-  text-align:center;
-  min-width:350px;
-  box-shadow: 0 0 40px rgba(127, 90, 240, 0.4);
-}
-
-#walletModalContent h2 {
-  font-size:28px;
-  margin-bottom:10px;
-  background: linear-gradient(135deg, #7f5af0, #00f0ff);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-
-#walletModalContent p {
-  font-size:14px;
-  color:#aaa;
-  margin-bottom:30px;
-  line-height:1.6;
-}
-
-#connectBtn, #leaderboardBtn {
-  background: linear-gradient(135deg, #7f5af0, #9962ff);
-  border:none;
-  color:white;
-  padding:14px 28px;
-  font-size:16px;
-  font-weight:bold;
-  border-radius:8px;
-  cursor:pointer;
-  transition:all 0.3s ease;
-  margin:10px;
-  box-shadow: 0 4px 15px rgba(127, 90, 240, 0.4);
-}
-
+#walletModal { position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:1000; backdrop-filter:blur(4px); }
+#walletModalContent { background: linear-gradient(135deg, rgba(20, 20, 50, 0.95), rgba(30, 30, 60, 0.95)); border: 2px solid #7f5af0; border-radius:12px; padding:40px; text-align:center; min-width:350px; box-shadow: 0 0 40px rgba(127, 90, 240, 0.4); }
+#walletModalContent h2 { font-size:28px; margin-bottom:10px; background: linear-gradient(135deg, #7f5af0, #00f0ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+#walletModalContent p { font-size:14px; color:#aaa; margin-bottom:30px; line-height:1.6; }
+#connectBtn, #leaderboardBtn { background: linear-gradient(135deg, #7f5af0, #9962ff); border:none; color:white; padding:14px 28px; font-size:16px; font-weight:bold; border-radius:8px; cursor:pointer; transition:all 0.3s ease; margin:10px; box-shadow: 0 4px 15px rgba(127, 90, 240, 0.4); }
 #connectBtn:hover { transform:translateY(-2px); box-shadow: 0 6px 25px rgba(127, 90, 240, 0.6); }
 #connectBtn:disabled { opacity:0.5; cursor:not-allowed; }
-
-#connectBtn.loading::after {
-  content: '';
-  display:inline-block;
-  width:14px; height:14px;
-  margin-left:8px;
-  border:2px solid rgba(255,255,255,0.3);
-  border-top-color:white;
-  border-radius:50%;
-  animation:spin 0.6s linear infinite;
-}
-
+#connectBtn.loading::after { content: ''; display:inline-block; width:14px; height:14px; margin-left:8px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.6s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-/* === WALLET STATUS === */
-#walletStatus {
-  position:absolute; top:20px; right:20px; z-index:100;
-  display:flex; align-items:center; gap:12px;
-  background: rgba(0, 240, 255, 0.1);
-  border: 2px solid #00f0ff;
-  padding:10px 16px;
-  border-radius:8px;
-  font-size:14px;
-  font-weight:bold;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
-}
-
-#walletStatus .status-dot {
-  width:8px; height:8px; background:#00ff00; border-radius:50%;
-  box-shadow: 0 0 8px #00ff00;
-}
-
-#disconnectBtn {
-  background:rgba(255,100,100,0.2);
-  border:1px solid #ff6464;
-  color:#ff9696;
-  padding:4px 8px;
-  border-radius:4px;
-  font-size:12px;
-  cursor:pointer;
-  transition:all 0.2s;
-}
-
+#walletStatus { position:absolute; top:20px; right:20px; z-index:100; display:flex; align-items:center; gap:12px; background: rgba(0, 240, 255, 0.1); border: 2px solid #00f0ff; padding:10px 16px; border-radius:8px; font-size:14px; font-weight:bold; box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); display:none; }
+#walletStatus .status-dot { width:8px; height:8px; background:#00ff00; border-radius:50%; box-shadow:0 0 8px #00ff00; }
+#disconnectBtn { background:rgba(255,100,100,0.2); border:1px solid #ff6464; color:#ff9696; padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer; transition:all 0.2s; }
 #disconnectBtn:hover { background:rgba(255,100,100,0.4); }
 
-/* === LEADERBOARD === */
-#leaderboardPanel {
-  position:absolute; bottom:20px; right:20px; z-index:100;
-  width:320px;
-  background: linear-gradient(135deg, rgba(20, 20, 50, 0.85), rgba(30, 30, 60, 0.85));
-  border: 2px solid #00f0ff;
-  border-radius:10px;
-  padding:16px;
-  max-height:400px;
-  display:none;
-  flex-direction:column;
-  box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
-  backdrop-filter:blur(10px);
-}
-
+#leaderboardPanel { position:absolute; bottom:20px; right:20px; z-index:100; width:320px; background: linear-gradient(135deg, rgba(20, 20, 50, 0.85), rgba(30, 30, 60, 0.85)); border: 2px solid #00f0ff; border-radius:10px; padding:16px; max-height:400px; display:none; flex-direction:column; box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); backdrop-filter:blur(10px); }
 #leaderboardPanel.active { display:flex; }
-
-#leaderboardHeader {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-  padding-bottom:12px;
-  border-bottom:1px solid rgba(0, 240, 255, 0.3);
-}
-
-#leaderboardHeader h3 {
-  font-size:16px;
-  color:#00f0ff;
-  margin:0;
-}
-
-#leaderboardClose {
-  background:none; border:none; color:#00f0ff;
-  font-size:20px; cursor:pointer;
-  transition:color 0.2s;
-}
-
+#leaderboardHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid rgba(0, 240, 255, 0.3); }
+#leaderboardHeader h3 { font-size:16px; color:#00f0ff; margin:0; }
+#leaderboardClose { background:none; border:none; color:#00f0ff; font-size:20px; cursor:pointer; transition:color 0.2s; }
 #leaderboardClose:hover { color:#7f5af0; }
-
-#leaderboardList {
-  overflow-y:auto;
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  font-size:13px;
-}
-
-.leaderboard-entry {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px;
-  background:rgba(127, 90, 240, 0.1);
-  border:1px solid rgba(127, 90, 240, 0.2);
-  border-radius:6px;
-  transition:all 0.2s;
-}
-
-.leaderboard-entry:hover {
-  background:rgba(127, 90, 240, 0.2);
-  border-color:rgba(127, 90, 240, 0.4);
-}
-
-.leaderboard-rank {
-  font-weight:bold;
-  color:#7f5af0;
-  min-width:20px;
-}
-
+#leaderboardList { overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; font-size:13px; }
+.leaderboard-entry { display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(127, 90, 240, 0.1); border:1px solid rgba(127, 90, 240, 0.2); border-radius:6px; transition:all 0.2s; }
+.leaderboard-entry:hover { background:rgba(127, 90, 240, 0.2); border-color:rgba(127, 90, 240, 0.4); }
+.leaderboard-rank { font-weight:bold; color:#7f5af0; min-width:20px; }
 .leaderboard-rank.gold { color:#ffd700; }
 .leaderboard-rank.silver { color:#c0c0c0; }
 .leaderboard-rank.bronze { color:#cd7f32; }
+.leaderboard-wallet { font-family:monospace; font-size:11px; color:#aaa; flex:1; margin:0 8px; }
+.leaderboard-score { font-weight:bold; color:#00f0ff; }
+#leaderboardLoading { text-align:center; color:#aaa; font-size:12px; padding:20px 0; }
 
-.leaderboard-wallet {
-  font-family:monospace;
-  font-size:11px;
-  color:#aaa;
-  flex:1;
-  margin:0 8px;
-}
-
-.leaderboard-score {
-  font-weight:bold;
-  color:#00f0ff;
-}
-
-#leaderboardLoading {
-  text-align:center;
-  color:#aaa;
-  font-size:12px;
-  padding:20px 0;
-}
-
-/* === TOAST NOTIFICATIONS === */
-#toastContainer {
-  position:fixed;
-  bottom:30px; left:30px;
-  z-index:500;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  pointer-events:none;
-}
-
-.toast {
-  background: linear-gradient(135deg, rgba(20, 20, 50, 0.9), rgba(30, 30, 60, 0.9));
-  border:2px solid;
-  border-radius:8px;
-  padding:14px 18px;
-  font-size:13px;
-  font-weight:500;
-  max-width:280px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  animation:slideIn 0.3s ease-out;
-  pointer-events:all;
-}
-
+#toastContainer { position:fixed; bottom:30px; left:30px; z-index:500; display:flex; flex-direction:column; gap:10px; pointer-events:none; }
+.toast { background: linear-gradient(135deg, rgba(20, 20, 50, 0.9), rgba(30, 30, 60, 0.9)); border:2px solid; border-radius:8px; padding:14px 18px; font-size:13px; font-weight:500; max-width:280px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); animation:slideIn 0.3s ease-out; pointer-events:all; }
 .toast.success { border-color:#00ff00; color:#00ff00; }
 .toast.error { border-color:#ff6464; color:#ff9696; }
 .toast.info { border-color:#00f0ff; color:#00f0ff; }
 .toast.warning { border-color:#ffb800; color:#ffd700; }
-
-@keyframes slideIn {
-  from { transform:translateX(-400px); opacity:0; }
-  to { transform:translateX(0); opacity:1; }
-}
-
-@keyframes slideOut {
-  from { transform:translateX(0); opacity:1; }
-  to { transform:translateX(-400px); opacity:0; }
-}
-
+@keyframes slideIn { from { transform:translateX(-400px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+@keyframes slideOut { from { transform:translateX(0); opacity:1; } to { transform:translateX(-400px); opacity:0; } }
 .toast.removing { animation:slideOut 0.3s ease-out; }
 
-/* === RECENT POPS === */
-#recentPops {
-  position:absolute; top:120px; left:20px;
-  width:280px;
-  background: rgba(17, 17, 42, 0.85);
-  border: 2px solid rgba(127, 90, 240, 0.3);
-  border-radius:10px;
-  padding:12px;
-  font-size:12px;
-  max-height:140px;
-  overflow-y:auto;
-  display:none;
-  z-index:100;
-}
-
+#recentPops { position:absolute; top:120px; left:20px; width:280px; background: rgba(17, 17, 42, 0.85); border: 2px solid rgba(127, 90, 240, 0.3); border-radius:10px; padding:12px; font-size:12px; max-height:140px; overflow-y:auto; display:none; z-index:100; }
 #recentPops.active { display:block; }
+#recentPops h4 { color:#7f5af0; font-size:13px; margin-bottom:8px; }
+.recent-pop-item { padding:6px; background:rgba(127, 90, 240, 0.05); border-left:2px solid #7f5af0; margin-bottom:6px; color:#ccc; font-size:11px; }
 
-#recentPops h4 {
-  color:#7f5af0;
-  font-size:13px;
-  margin-bottom:8px;
-}
+#recordBtn { position:absolute; bottom:20px; left:20px; padding:12px 20px; background: linear-gradient(135deg, #7f5af0, #9962ff); border:none; border-radius:8px; color:white; font-weight:bold; font-size:14px; cursor:pointer; transition:all 0.3s; box-shadow: 0 4px 15px rgba(127, 90, 240, 0.4); z-index:100; }
+#recordBtn:hover:not(:disabled) { transform:translateY(-2px); box-shadow: 0 6px 25px rgba(127, 90, 240, 0.6); }
+#recordBtn:disabled { opacity:0.5; cursor:not-allowed; }
 
-.recent-pop-item {
-  padding:6px;
-  background:rgba(127, 90, 240, 0.05);
-  border-left:2px solid #7f5af0;
-  margin-bottom:6px;
-  color:#ccc;
-  font-size:11px;
-}
-
-/* === RECORD BUTTON === */
-#recordBtn {
-  position:absolute; bottom:20px; left:20px;
-  padding:12px 20px;
-  background: linear-gradient(135deg, #7f5af0, #9962ff);
-  border:none;
-  border-radius:8px;
-  color:white;
-  font-weight:bold;
-  font-size:14px;
-  cursor:pointer;
-  transition:all 0.3s;
-  box-shadow: 0 4px 15px rgba(127, 90, 240, 0.4);
-  z-index:100;
-}
-
-#recordBtn:hover:not(:disabled) { 
-  transform:translateY(-2px); 
-  box-shadow: 0 6px 25px rgba(127, 90, 240, 0.6);
-}
-
-#recordBtn:disabled {
-  opacity:0.5;
-  cursor:not-allowed;
-}
-
-/* === SCROLLBAR STYLING === */
-::-webkit-scrollbar {
-  width:6px;
-}
-
-::-webkit-scrollbar-track {
-  background:rgba(127, 90, 240, 0.1);
-  border-radius:10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background:rgba(127, 90, 240, 0.4);
-  border-radius:10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background:rgba(127, 90, 240, 0.6);
-}
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:rgba(127, 90, 240, 0.1); border-radius:10px; }
+::-webkit-scrollbar-thumb { background:rgba(127, 90, 240, 0.4); border-radius:10px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(127, 90, 240, 0.6); }
 </style>
 </head>
 <body>
 
 <canvas id="gameCanvas"></canvas>
 
-<!-- WALLET MODAL -->
 <div id="walletModal">
   <div id="walletModalContent">
-    <h2>🎮 Arc Orb Challenge</h2>
-    <p>Connect your wallet to play and record your scores on-chain on Arc Testnet</p>
+    <h2>🎮 Legendary Arc Orb Pop Challenge</h2>
+    <p>Connect your wallet to record your scores on Arc Testnet. You can play without connecting.</p>
     <button id="connectBtn">Connect Wallet</button>
-    <button id="leaderboardBtn" style="margin-top:5px;">View Leaderboard</button>
+    <button id="leaderboardBtn">View Leaderboard</button>
   </div>
 </div>
 
-<!-- TOP UI -->
 <div id="ui">
   <div id="popCounter">Pops: 0</div>
   <div id="gameStatus">Arc Testnet • Ready</div>
 </div>
 
-<!-- WALLET STATUS -->
-<div id="walletStatus" style="display:none;">
+<div id="walletStatus">
   <span class="status-dot"></span>
   <span id="walletAddressDisplay">0x0000…0000</span>
   <button id="disconnectBtn">Disconnect</button>
 </div>
 
-<!-- RECENT POPS PANEL -->
 <div id="recentPops">
   <h4>Recent Pops</h4>
   <div id="recentPopsList"></div>
 </div>
 
-<!-- LEADERBOARD PANEL -->
 <div id="leaderboardPanel">
   <div id="leaderboardHeader">
     <h3>Top Scorers</h3>
@@ -394,61 +109,37 @@ body, html {
   </div>
 </div>
 
-<!-- BUTTONS -->
 <button id="recordBtn">Record Score</button>
-
-<!-- TOAST CONTAINER -->
 <div id="toastContainer"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 <script>
+// --- CANVAS ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// === TOAST NOTIFICATION SYSTEM ===
-function showToast(message, type = 'info', duration = 3000) {
-  const container = document.getElementById('toastContainer');
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = message;
-  container.appendChild(toast);
-
-  const removeTimer = setTimeout(() => {
-    toast.classList.add('removing');
-    setTimeout(() => toast.remove(), 300);
-  }, duration);
-
-  toast.addEventListener('click', () => {
-    clearTimeout(removeTimer);
-    toast.classList.add('removing');
-    setTimeout(() => toast.remove(), 300);
-  });
-}
-
-// === GAME STATE ===
+// --- GAME STATE ---
 const orbColors = [
-  {color:'#7f5af0', type:'common'},
-  {color:'#00f0ff', type:'rare'},
-  {color:'#ff6fff', type:'epic'}
+    {color:'#7f5af0', type:'common'},
+    {color:'#00f0ff', type:'rare'},
+    {color:'#ff6fff', type:'epic'}
 ];
-
 const orbCount = 8;
 let orbs = [];
 let pops = 0;
 let recentPops = [];
-let backgroundParticles = [];
-let gameActive = false;
-let isRecording = false;
+let bgParticles = [];
+let gameActive = true;
 
-// === AUDIO ===
-const popSound = new Audio('https://freesound.org/data/previews/341/341695_3248244-lq.mp3');
+// --- AUDIO ---
+const popSound = new Audio('data:audio/wav;base64,UklGRhQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
 popSound.volume = 0.3;
-const streakSound = new Audio('https://freesound.org/data/previews/146/146726_2615112-lq.mp3');
+const streakSound = new Audio('data:audio/wav;base64,UklGRhQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
 streakSound.volume = 0.2;
 
-// === WEB3 ===
+// --- WEB3 ---
 let provider, signer, userAddress;
 const contractAddress = "0x69f153233DB821382c5b7E03348304d161942539";
 const contractABI = [
@@ -459,7 +150,25 @@ const contractABI = [
 ];
 let contract;
 
-// === ORB CLASS ===
+// --- TOAST ---
+function showToast(msg, type='info', duration=3000) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  const r = setTimeout(() => {
+    t.classList.add('removing');
+    setTimeout(() => t.remove(), 300);
+  }, duration);
+  t.addEventListener('click', () => {
+    clearTimeout(r);
+    t.classList.add('removing');
+    setTimeout(() => t.remove(), 300);
+  });
+}
+
+// --- ORB CLASS ---
 class Orb {
   constructor(id, x, y, colorObj) {
     this.id = id;
@@ -473,44 +182,49 @@ class Orb {
     this.popped = false;
     this.trail = [];
   }
-
+  
   draw() {
-    if (this.popped) return;
-
+    if(this.popped) return;
+    
+    ctx.save();
+    
     // Draw trail
-    for (let i = 0; i < this.trail.length; i++) {
+    for(let i = 0; i < this.trail.length; i++) {
       const t = this.trail[i];
       ctx.beginPath();
       ctx.fillStyle = this.color;
       ctx.globalAlpha = 0.3 * (1 - i / this.trail.length);
-      ctx.arc(t.x, t.y, this.radius * 0.6 * (1 - i / this.trail.length), 0, Math.PI * 2);
+      ctx.arc(t.x, t.y, this.radius * 0.6 * (1 - i / this.trail.length), 0, 2 * Math.PI);
       ctx.fill();
     }
-
+    
+    // Draw main orb
     ctx.globalAlpha = 1;
-
-    // Draw orb
     ctx.beginPath();
     ctx.fillStyle = this.color;
     ctx.shadowColor = this.color;
     ctx.shadowBlur = 20;
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
+    
+    ctx.restore();
   }
-
+  
   move() {
-    if (this.popped) return;
+    if(this.popped) return;
+    
     this.trail.unshift({x: this.x, y: this.y});
-    if (this.trail.length > 10) this.trail.pop();
+    if(this.trail.length > 10) this.trail.pop();
+    
     this.x += this.dx;
     this.y += this.dy;
-
-    if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) this.dx *= -1;
-    if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) this.dy *= -1;
+    
+    if(this.x - this.radius < 0 || this.x + this.radius > canvas.width) this.dx *= -1;
+    if(this.y - this.radius < 0 || this.y + this.radius > canvas.height) this.dy *= -1;
   }
 }
 
-// === BACKGROUND PARTICLES ===
+// --- BG PARTICLES ---
 class BgParticle {
   constructor() {
     this.x = Math.random() * canvas.width;
@@ -520,290 +234,269 @@ class BgParticle {
     this.dy = (Math.random() * 2 - 1) * 0.2;
     this.alpha = Math.random() * 0.5 + 0.3;
   }
-
+  
   draw() {
+    ctx.save();
     ctx.beginPath();
     ctx.fillStyle = "#00ffff";
     ctx.globalAlpha = this.alpha;
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.restore();
   }
-
+  
   move() {
     this.x += this.dx;
     this.y += this.dy;
-    if (this.x < 0) this.x = canvas.width;
-    if (this.x > canvas.width) this.x = 0;
-    if (this.y < 0) this.y = canvas.height;
-    if (this.y > canvas.height) this.y = 0;
+    if(this.x < 0) this.x = canvas.width;
+    if(this.x > canvas.width) this.x = 0;
+    if(this.y < 0) this.y = canvas.height;
+    if(this.y > canvas.height) this.y = 0;
   }
 }
 
-// === INITIALIZE ===
+// --- SPAWN ---
 function spawnOrbs() {
   orbs = [];
-  for (let i = 0; i < orbCount; i++) {
+  for(let i = 0; i < orbCount; i++) {
     const c = orbColors[Math.floor(Math.random() * orbColors.length)];
     orbs.push(new Orb(i, Math.random() * canvas.width, Math.random() * canvas.height, c));
   }
 }
 
-function spawnBackgroundParticles() {
-  for (let i = 0; i < 100; i++) {
-    backgroundParticles.push(new BgParticle());
-  }
+function spawnBg() {
+  for(let i = 0; i < 100; i++) bgParticles.push(new BgParticle());
 }
 
-// === ANIMATION LOOP ===
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  backgroundParticles.forEach(p => { p.move(); p.draw(); });
-  orbs.forEach(o => { o.move(); o.draw(); });
+  bgParticles.forEach(p => {p.move(); p.draw();});
+  orbs.forEach(o => {o.move(); o.draw();});
   requestAnimationFrame(animate);
 }
 
-// === RECENT POPS ===
+spawnOrbs();
+spawnBg();
+animate();
+
+// --- RECENT POPS ---
 function addRecentPop(orb) {
-  const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-  const walletShort = userAddress ? userAddress.slice(0, 6) + "…" + userAddress.slice(-4) : "0x0000…0000";
-  recentPops.unshift(`[${time}] ${walletShort} • ${orb.type}`);
-  if (recentPops.length > 5) recentPops.pop();
-
-  const listEl = document.getElementById('recentPopsList');
-  listEl.innerHTML = recentPops.map(p => `<div class="recent-pop-item">${p}</div>`).join('');
-
-  if (pops % 5 === 0 && pops > 0) {
-    try { streakSound.play(); } catch (e) {}
-  }
+  recentPops.unshift({type: orb.type, id: orb.id, time: new Date()});
+  if(recentPops.length > 5) recentPops.pop();
+  
+  const list = document.getElementById('recentPopsList');
+  list.innerHTML = '';
+  recentPops.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'recent-pop-item';
+    item.textContent = `${p.type.toUpperCase()} Orb #${p.id} • ${p.time.toLocaleTimeString()}`;
+    list.appendChild(item);
+  });
+  
+  document.getElementById('recentPops').classList.add('active');
 }
 
-// === SPAWN NEW ORB ===
-function spawnNewOrb() {
-  const c = orbColors[Math.floor(Math.random() * orbColors.length)];
-  orbs.push(new Orb(orbs.length, Math.random() * canvas.width, Math.random() * canvas.height, c));
-}
-
-// === CANVAS CLICK ===
-canvas.addEventListener('click', async (e) => {
-  if (!gameActive) return;
-
+// --- GAME INTERACTION ---
+canvas.addEventListener('click', e => {
+  if(!gameActive) return;
+  
   const rect = canvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
-
-  for (let orb of orbs) {
-    if (orb.popped) continue;
-    const dist = Math.hypot(mx - orb.x, my - orb.y);
-    if (dist < orb.radius) {
-      orb.popped = true;
-      pops++;
-      document.getElementById('popCounter').innerText = "Pops: " + pops;
-      addRecentPop(orb);
-      spawnNewOrb();
-
-      try { popSound.play(); } catch (e) {}
-
-      showToast(`Popped a ${orb.type} orb! 🎯`, 'success', 1500);
-      await sendPopTransaction(orb.id);
-      break;
+  
+  orbs.forEach(orb => {
+    if(!orb.popped) {
+      const dx = orb.x - mx;
+      const dy = orb.y - my;
+      if(Math.sqrt(dx * dx + dy * dy) < orb.radius) {
+        orb.popped = true;
+        pops++;
+        document.getElementById('popCounter').textContent = `Pops: ${pops}`;
+        
+        try {
+          popSound.currentTime = 0;
+          popSound.play().catch(() => {});
+        } catch(e) {}
+        
+        addRecentPop(orb);
+        
+        // Respawn the orb after a delay
+        setTimeout(() => {
+          const c = orbColors[Math.floor(Math.random() * orbColors.length)];
+          orbs[orb.id] = new Orb(orb.id, Math.random() * canvas.width, Math.random() * canvas.height, c);
+        }, 500);
+      }
     }
-  }
+  });
 });
 
-// === WALLET CONNECTION ===
+// --- WALLET / WEB3 ---
 async function connectWallet() {
-  if (!window.ethereum) {
-    showToast('MetaMask not detected. Install it to play!', 'error');
-    return;
-  }
-
-  try {
-    const connectBtn = document.getElementById('connectBtn');
-    connectBtn.disabled = true;
-    connectBtn.classList.add('loading');
-    showToast('Connecting wallet...', 'info');
-
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = provider.getSigner();
-    userAddress = await signer.getAddress();
-    contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-    // Update UI
-    document.getElementById('walletModal').style.display = 'none';
-    document.getElementById('walletStatus').style.display = 'flex';
-    document.getElementById('walletAddressDisplay').textContent = userAddress.slice(0, 6) + "…" + userAddress.slice(-4);
-    document.getElementById('recentPops').classList.add('active');
-    gameActive = true;
-
-    connectBtn.disabled = false;
-    connectBtn.classList.remove('loading');
-
-    showToast('Wallet connected! Start popping! 🎮', 'success');
-  } catch (error) {
-    console.error(error);
-    showToast('Failed to connect wallet', 'error');
-    const connectBtn = document.getElementById('connectBtn');
-    connectBtn.disabled = false;
-    connectBtn.classList.remove('loading');
+  if(window.ethereum) {
+    try {
+      const btn = document.getElementById('connectBtn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+      
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddress = await signer.getAddress();
+      contract = new ethers.Contract(contractAddress, contractABI, signer);
+      
+      // Check network
+      const network = await provider.getNetwork();
+      if(network.chainId !== 1234567) { // Replace with actual Arc Testnet chain ID
+        showToast('Please switch to Arc Testnet', 'warning');
+      }
+      
+      document.getElementById('walletAddressDisplay').textContent = 
+        userAddress.slice(0, 6) + '…' + userAddress.slice(-4);
+      document.getElementById('walletStatus').style.display = 'flex';
+      document.getElementById('walletModal').style.display = 'none';
+      showToast('Wallet connected!', 'success');
+    } catch(err) {
+      console.error(err);
+      showToast('Connection failed: ' + err.message, 'error');
+    } finally {
+      document.getElementById('connectBtn').disabled = false;
+      document.getElementById('connectBtn').classList.remove('loading');
+    }
+  } else {
+    showToast('No Ethereum wallet detected', 'warning');
   }
 }
 
-// === SEND POP TRANSACTION ===
-async function sendPopTransaction(orbId) {
-  if (!contract) return;
-  try {
-    const tx = await contract.popOrb(orbId);
-    document.getElementById('gameStatus').textContent = 'Arc Testnet • Recording...';
-    await tx.wait();
-    document.getElementById('gameStatus').textContent = 'Arc Testnet • Ready';
-  } catch (e) {
-    console.error(e);
-    // Silently fail - don't interrupt gameplay
-  }
-}
+document.getElementById('connectBtn').addEventListener('click', connectWallet);
 
-// === RECORD SCORE ===
-document.getElementById('recordBtn').addEventListener('click', async () => {
-  if (!gameActive) {
+document.getElementById('disconnectBtn').addEventListener('click', () => {
+  provider = signer = userAddress = contract = null;
+  document.getElementById('walletStatus').style.display = 'none';
+  document.getElementById('walletModal').style.display = 'flex';
+  showToast('Wallet disconnected', 'info');
+});
+
+// --- RECORD SCORE ---
+async function recordScore() {
+  if(!contract || !userAddress) {
     showToast('Connect wallet first', 'warning');
     return;
   }
-
-  if (pops === 0) {
-    showToast('Pop some orbs first! 🎯', 'warning');
+  
+  if(pops === 0) {
+    showToast('Pop some orbs first!', 'info');
     return;
   }
-
+  
   try {
-    const recordBtn = document.getElementById('recordBtn');
-    recordBtn.disabled = true;
-    isRecording = true;
-
-    showToast('Recording score on-chain...', 'info');
-
+    const btn = document.getElementById('recordBtn');
+    btn.disabled = true;
+    btn.textContent = 'Recording...';
+    
     const tx = await contract.recordScore(pops);
-    document.getElementById('gameStatus').textContent = 'Arc Testnet • Recording...';
-
+    showToast('Recording score...', 'info', 2000);
     await tx.wait();
-
-    document.getElementById('gameStatus').textContent = 'Arc Testnet • Ready';
-    recordBtn.disabled = false;
-    isRecording = false;
-
-    showToast(`Score recorded! 🏆 ${pops} pops saved to Arc`, 'success');
-    await loadLeaderboard();
-  } catch (error) {
-    console.error(error);
-    showToast('Failed to record score', 'error');
-    const recordBtn = document.getElementById('recordBtn');
-    recordBtn.disabled = false;
-    isRecording = false;
+    showToast(`Score of ${pops} recorded on-chain!`, 'success');
+    
+    btn.textContent = 'Record Score';
+    btn.disabled = false;
+  } catch(err) {
+    console.error(err);
+    showToast('Failed to record: ' + (err.message || 'Unknown error'), 'error');
+    document.getElementById('recordBtn').textContent = 'Record Score';
+    document.getElementById('recordBtn').disabled = false;
   }
-});
+}
 
-// === LEADERBOARD ===
-async function loadLeaderboard() {
-  if (!contract) return;
+document.getElementById('recordBtn').addEventListener('click', recordScore);
 
-  const leaderboard = document.getElementById('leaderboardList');
-  leaderboard.innerHTML = '<div id="leaderboardLoading">Loading leaderboard...</div>';
-
+// --- LEADERBOARD ---
+async function fetchLeaderboard() {
+  const panel = document.getElementById('leaderboardPanel');
+  panel.classList.add('active');
+  
+  const listEl = document.getElementById('leaderboardList');
+  listEl.innerHTML = '<div id="leaderboardLoading">Loading leaderboard...</div>';
+  
   try {
-    // Fetch events from the contract
-    const eventFilter = contract.filters.ScoreRecorded();
-    const events = await contract.queryFilter(eventFilter);
-
-    // Parse and aggregate scores by user
-    const scoreMap = {};
-    events.forEach(event => {
-      const user = event.args.user;
-      const score = event.args.totalPops.toNumber();
-      if (!scoreMap[user] || scoreMap[user] < score) {
-        scoreMap[user] = score;
+    // Use JsonRpcProvider for read-only access
+    let readProvider;
+    if(provider && provider.provider) {
+      readProvider = provider;
+    } else {
+      // Fallback to public RPC (replace with actual Arc Testnet RPC)
+      readProvider = new ethers.providers.JsonRpcProvider("https://rpc.testnet.arc.network");
+    }
+    
+    const tempContract = new ethers.Contract(contractAddress, contractABI, readProvider);
+    const filter = tempContract.filters.ScoreRecorded();
+    
+    // Query recent blocks to avoid timeout
+    const currentBlock = await readProvider.getBlockNumber();
+    const fromBlock = Math.max(0, currentBlock - 10000);
+    
+    const events = await tempContract.queryFilter(filter, fromBlock, 'latest');
+    
+    const scores = {};
+    events.forEach(e => {
+      const addr = e.args.user;
+      const total = e.args.totalPops.toNumber();
+      if(!scores[addr] || total > scores[addr]) {
+        scores[addr] = total;
       }
     });
-
-    // Convert to array and sort
-    const sorted = Object.entries(scoreMap)
-      .map(([address, score]) => ({address, score}))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
-
-    if (sorted.length === 0) {
-      leaderboard.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px;">No scores recorded yet</div>';
+    
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    
+    listEl.innerHTML = '';
+    
+    if(sorted.length === 0) {
+      listEl.innerHTML = '<div id="leaderboardLoading">No scores yet. Be the first!</div>';
       return;
     }
-
-    // Render leaderboard
-    leaderboard.innerHTML = sorted.map((entry, index) => {
-      let rankClass = '';
-      if (index === 0) rankClass = 'gold';
-      else if (index === 1) rankClass = 'silver';
-      else if (index === 2) rankClass = 'bronze';
-
-      const isYou = entry.address.toLowerCase() === userAddress?.toLowerCase();
-      return `
-        <div class="leaderboard-entry" style="${isYou ? 'border-color:#00f0ff;background:rgba(0,240,255,0.15)' : ''}">
-          <span class="leaderboard-rank ${rankClass}">#${index + 1}</span>
-          <span class="leaderboard-wallet">${entry.address.slice(0, 6)}…${entry.address.slice(-4)}${isYou ? ' (you)' : ''}</span>
-          <span class="leaderboard-score">${entry.score}</span>
-        </div>
-      `;
-    }).join('');
-  } catch (error) {
-    console.error(error);
-    leaderboard.innerHTML = '<div style="text-align:center;color:#ff9696;padding:20px;">Failed to load leaderboard</div>';
+    
+    sorted.forEach(([addr, score], i) => {
+      const entry = document.createElement('div');
+      entry.className = 'leaderboard-entry';
+      
+      const rank = document.createElement('div');
+      rank.className = 'leaderboard-rank';
+      if(i === 0) rank.classList.add('gold');
+      else if(i === 1) rank.classList.add('silver');
+      else if(i === 2) rank.classList.add('bronze');
+      rank.textContent = i + 1;
+      
+      const wallet = document.createElement('div');
+      wallet.className = 'leaderboard-wallet';
+      wallet.textContent = addr.slice(0, 6) + '…' + addr.slice(-4);
+      
+      const scoreEl = document.createElement('div');
+      scoreEl.className = 'leaderboard-score';
+      scoreEl.textContent = score;
+      
+      entry.appendChild(rank);
+      entry.appendChild(wallet);
+      entry.appendChild(scoreEl);
+      listEl.appendChild(entry);
+    });
+  } catch(err) {
+    console.error(err);
+    listEl.innerHTML = '<div id="leaderboardLoading">Failed to load leaderboard</div>';
+    showToast('Failed to load leaderboard', 'error');
   }
 }
 
-// === LEADERBOARD UI ===
-document.getElementById('leaderboardBtn').addEventListener('click', () => {
-  if (!gameActive) {
-    showToast('Connect wallet first', 'warning');
-    return;
-  }
-  document.getElementById('leaderboardPanel').classList.add('active');
-  loadLeaderboard();
-});
-
+document.getElementById('leaderboardBtn').addEventListener('click', fetchLeaderboard);
 document.getElementById('leaderboardClose').addEventListener('click', () => {
   document.getElementById('leaderboardPanel').classList.remove('active');
 });
 
-// === DISCONNECT ===
-document.getElementById('disconnectBtn').addEventListener('click', () => {
-  userAddress = null;
-  provider = null;
-  signer = null;
-  contract = null;
-  gameActive = false;
-  pops = 0;
-  recentPops = [];
-
-  document.getElementById('walletModal').style.display = 'flex';
-  document.getElementById('walletStatus').style.display = 'none';
-  document.getElementById('recentPops').classList.remove('active');
-  document.getElementById('leaderboardPanel').classList.remove('active');
-  document.getElementById('popCounter').textContent = "Pops: 0";
-  document.getElementById('connectBtn').disabled = false;
-  document.getElementById('connectBtn').classList.remove('loading');
-
-  showToast('Wallet disconnected', 'info');
-});
-
-// === START UP ===
-document.getElementById('connectBtn').addEventListener('click', connectWallet);
-spawnOrbs();
-spawnBackgroundParticles();
-animate();
-
-// Handle window resize
+// --- RESIZE ---
 window.addEventListener('resize', () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
 </script>
+
 </body>
 </html>
